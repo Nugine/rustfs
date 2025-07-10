@@ -20,7 +20,7 @@ use crate::{
     manager::{extract_jwt_claims, get_default_policyes},
 };
 use futures::future::join_all;
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 use rustfs_ecstore::{
     config::{
         RUSTFS_CONFIG_PREFIX,
@@ -39,20 +39,17 @@ use tokio::sync::broadcast::{self, Receiver as B_Receiver};
 use tokio::sync::mpsc::{self, Sender};
 use tracing::{debug, info, warn};
 
-lazy_static! {
-    pub static ref IAM_CONFIG_PREFIX: String = format!("{}/iam", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_USERS_PREFIX: String = format!("{}/iam/users/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_SERVICE_ACCOUNTS_PREFIX: String = format!("{}/iam/service-accounts/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_GROUPS_PREFIX: String = format!("{}/iam/groups/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_POLICIES_PREFIX: String = format!("{}/iam/policies/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_STS_PREFIX: String = format!("{}/iam/sts/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_POLICY_DB_PREFIX: String = format!("{}/iam/policydb/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_POLICY_DB_USERS_PREFIX: String = format!("{}/iam/policydb/users/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_POLICY_DB_STS_USERS_PREFIX: String = format!("{}/iam/policydb/sts-users/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_POLICY_DB_SERVICE_ACCOUNTS_PREFIX: String =
-        format!("{}/iam/policydb/service-accounts/", RUSTFS_CONFIG_PREFIX);
-    pub static ref IAM_CONFIG_POLICY_DB_GROUPS_PREFIX: String = format!("{}/iam/policydb/groups/", RUSTFS_CONFIG_PREFIX);
-}
+pub static IAM_CONFIG_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_USERS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/users/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_SERVICE_ACCOUNTS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/service-accounts/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_GROUPS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/groups/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_POLICIES_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/policies/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_STS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/sts/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_POLICY_DB_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/policydb/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_POLICY_DB_USERS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/policydb/users/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_POLICY_DB_STS_USERS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/policydb/sts-users/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_POLICY_DB_SERVICE_ACCOUNTS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/policydb/service-accounts/", RUSTFS_CONFIG_PREFIX));
+pub static IAM_CONFIG_POLICY_DB_GROUPS_PREFIX: LazyLock<String> = LazyLock::new(|| format!("{}/iam/policydb/groups/", RUSTFS_CONFIG_PREFIX));
 
 const IAM_IDENTITY_FILE: &str = "identity.json";
 const IAM_POLICY_FILE: &str = "policy.json";

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use http::{HeaderMap, HeaderValue};
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 use rustfs_ecstore::bucket::versioning_sys::BucketVersioningSys;
 use rustfs_ecstore::error::Result;
 use rustfs_ecstore::error::StorageError;
@@ -214,20 +214,18 @@ pub fn extract_metadata_from_mime(headers: &HeaderMap<HeaderValue>, metadata: &m
     }
 }
 
-lazy_static! {
-    /// List of supported headers.
-    static ref SUPPORTED_HEADERS: Vec<&'static str> = vec![
-        "content-type",
-        "cache-control",
-        "content-language",
-        "content-encoding",
-        "content-disposition",
-        "x-amz-storage-class",
-        "x-amz-tagging",
-        "expires",
-        "x-amz-replication-status"
-    ];
-}
+/// List of supported headers.
+static SUPPORTED_HEADERS: LazyLock<Vec<&'static str>> = LazyLock::new(|| vec![
+    "content-type",
+    "cache-control",
+    "content-language",
+    "content-encoding",
+    "content-disposition",
+    "x-amz-storage-class",
+    "x-amz-tagging",
+    "expires",
+    "x-amz-replication-status"
+]);
 
 #[cfg(test)]
 mod tests {

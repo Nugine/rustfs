@@ -16,7 +16,7 @@ use bytes::BytesMut;
 use http::HeaderMap;
 use http::Uri;
 use http::request;
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 use std::collections::HashMap;
 use std::fmt::Write;
 use time::{OffsetDateTime, macros::format_description};
@@ -32,15 +32,13 @@ pub const SIGN_V4_ALGORITHM: &str = "AWS4-HMAC-SHA256";
 pub const SERVICE_TYPE_S3: &str = "s3";
 pub const SERVICE_TYPE_STS: &str = "sts";
 
-lazy_static! {
-    static ref v4_ignored_headers: HashMap<String, bool> = {
-        let mut m = <HashMap<String, bool>>::new();
-        m.insert("accept-encoding".to_string(), true);
-        m.insert("authorization".to_string(), true);
-        m.insert("user-agent".to_string(), true);
-        m
-    };
-}
+static v4_ignored_headers: LazyLock<HashMap<String, bool>> = LazyLock::new(|| {
+    let mut m = <HashMap<String, bool>>::new();
+    m.insert("accept-encoding".to_string(), true);
+    m.insert("authorization".to_string(), true);
+    m.insert("user-agent".to_string(), true);
+    m
+});
 
 pub fn get_signing_key(secret: &str, loc: &str, t: OffsetDateTime, service_type: &str) -> [u8; 32] {
     let mut s = "AWS4".to_string();
