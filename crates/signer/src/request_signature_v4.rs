@@ -16,9 +16,9 @@ use bytes::BytesMut;
 use http::HeaderMap;
 use http::Uri;
 use http::request;
-use std::sync::LazyLock;
 use std::collections::HashMap;
 use std::fmt::Write;
+use std::sync::LazyLock;
 use time::{OffsetDateTime, macros::format_description};
 use tracing::debug;
 
@@ -32,6 +32,7 @@ pub const SIGN_V4_ALGORITHM: &str = "AWS4-HMAC-SHA256";
 pub const SERVICE_TYPE_S3: &str = "s3";
 pub const SERVICE_TYPE_STS: &str = "sts";
 
+#[allow(non_upper_case_globals)] // FIXME
 static v4_ignored_headers: LazyLock<HashMap<String, bool>> = LazyLock::new(|| {
     let mut m = <HashMap<String, bool>>::new();
     m.insert("accept-encoding".to_string(), true);

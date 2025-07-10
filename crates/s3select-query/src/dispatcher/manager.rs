@@ -33,7 +33,6 @@ use datafusion::{
     execution::{RecordBatchStream, SendableRecordBatchStream},
 };
 use futures::{Stream, StreamExt};
-use std::sync::LazyLock;
 use rustfs_s3select_api::{
     QueryError, QueryResult,
     query::{
@@ -48,6 +47,7 @@ use rustfs_s3select_api::{
     },
 };
 use s3s::dto::{FileHeaderInfo, SelectObjectContentInput};
+use std::sync::LazyLock;
 
 use crate::{
     execution::factory::QueryExecutionFactoryRef,

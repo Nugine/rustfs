@@ -14,12 +14,12 @@
 // limitations under the License.
 
 use async_trait::async_trait;
-use std::sync::LazyLock;
 use local_locker::LocalLocker;
 use lock_args::LockArgs;
 use remote_client::RemoteClient;
 use std::io::Result;
 use std::sync::Arc;
+use std::sync::LazyLock;
 use tokio::sync::RwLock;
 
 pub mod drwmutex;

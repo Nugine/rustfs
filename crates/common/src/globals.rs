@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(non_upper_case_globals)] // FIXME
+
 use std::collections::HashMap;
 use std::sync::LazyLock;
 

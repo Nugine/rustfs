@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::LazyLock;
 use rand::{Rng, RngCore};
 use regex::Regex;
 use std::io::{Error, Result};
+use std::sync::LazyLock;
 
 pub fn parse_bool(str: &str) -> Result<bool> {
     match str {

@@ -14,12 +14,12 @@
 
 use crate::utils::RustFSConfig;
 use dioxus::logger::tracing::{debug, error, info};
-use std::sync::LazyLock;
 use rust_embed::RustEmbed;
 use sha2::{Digest, Sha256};
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::process::Command as StdCommand;
+use std::sync::LazyLock;
 use std::time::Duration;
 use tokio::fs;
 use tokio::fs::File;

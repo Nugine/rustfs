@@ -17,8 +17,8 @@ use futures::pin_mut;
 use futures::{Stream, StreamExt};
 use hyper::client::conn::http2::Builder;
 use hyper_util::rt::TokioExecutor;
-use std::sync::LazyLock;
 use std::net::Ipv6Addr;
+use std::sync::LazyLock;
 use std::{
     collections::HashSet,
     fmt::Display,
