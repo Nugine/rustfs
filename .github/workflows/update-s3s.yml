@@ -1,0 +1,111 @@
+# Copyright 2024 RustFS Team
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Auto Update s3s
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday at midnight UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  update-s3s:
+    name: Update s3s Dependency
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Rust environment
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Get latest s3s commit
+        id: get_latest
+        run: |
+          # Clone s3s repository to get the latest commit
+          git clone --depth 1 https://github.com/s3s-project/s3s.git /tmp/s3s
+          cd /tmp/s3s
+          LATEST_REV=$(git rev-parse HEAD)
+          echo "latest_rev=${LATEST_REV}" >> $GITHUB_OUTPUT
+          echo "Latest s3s commit: ${LATEST_REV}"
+
+      - name: Get current s3s commit
+        id: get_current
+        run: |
+          CURRENT_REV=$(grep -A 1 's3s = { git' Cargo.toml | grep 'rev' | sed -E 's/.*rev = "([^"]+)".*/\1/')
+          echo "current_rev=${CURRENT_REV}" >> $GITHUB_OUTPUT
+          echo "Current s3s commit: ${CURRENT_REV}"
+
+      - name: Update s3s dependency
+        id: update
+        if: steps.get_current.outputs.current_rev != steps.get_latest.outputs.latest_rev
+        run: |
+          # Update the s3s dependency revision
+          sed -i "s/rev = \"${{ steps.get_current.outputs.current_rev }}\"/rev = \"${{ steps.get_latest.outputs.latest_rev }}\"/" Cargo.toml
+          
+          # Update Cargo.lock
+          cargo update -p s3s
+          
+          # Check if there are any changes
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+          fi
+
+      - name: Run tests
+        if: steps.update.outputs.has_changes == 'true'
+        run: |
+          # Run basic checks to ensure the update doesn't break anything
+          cargo check --all-targets
+          cargo fmt --all --check || true
+          cargo clippy --all-targets --all-features -- -D warnings || true
+
+      - name: Create Pull Request
+        if: steps.update.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): update s3s to ${{ steps.get_latest.outputs.latest_rev }}'
+          title: 'chore(deps): update s3s dependency'
+          body: |
+            ## Auto Update s3s Dependency
+            
+            This PR updates the `s3s` dependency to the latest commit.
+            
+            **Previous revision:** `${{ steps.get_current.outputs.current_rev }}`
+            **New revision:** `${{ steps.get_latest.outputs.latest_rev }}`
+            
+            **Changes:** https://github.com/s3s-project/s3s/compare/${{ steps.get_current.outputs.current_rev }}...${{ steps.get_latest.outputs.latest_rev }}
+            
+            ---
+            
+            This is an automated pull request. Please review the changes and ensure all tests pass before merging.
+          branch: auto-update-s3s-${{ steps.get_latest.outputs.latest_rev }}
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
